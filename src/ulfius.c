@@ -61,7 +61,11 @@ int y_close_logs() {
 /**
  * Fill a map with the key/values specified
  */
+#if MHD_VERSION >= 0x00097002
+static enum MHD_Result ulfius_fill_map_check_utf8(void * cls, enum MHD_ValueKind kind, const char * key, const char * value) {
+#else
 static int ulfius_fill_map_check_utf8(void * cls, enum MHD_ValueKind kind, const char * key, const char * value) {
+#endif
   char * tmp;
   int res;
   UNUSED(kind);
@@ -94,7 +98,11 @@ static int ulfius_fill_map_check_utf8(void * cls, enum MHD_ValueKind kind, const
 /**
  * Fill a map with the key/values specified
  */
+#if MHD_VERSION >= 0x00097002
+static enum MHD_Result ulfius_fill_map(void * cls, enum MHD_ValueKind kind, const char * key, const char * value) {
+#else
 static int ulfius_fill_map(void * cls, enum MHD_ValueKind kind, const char * key, const char * value) {
+#endif
   char * tmp;
   int res;
   UNUSED(kind);
@@ -124,7 +132,11 @@ static int ulfius_fill_map(void * cls, enum MHD_ValueKind kind, const char * key
  * ulfius_is_valid_endpoint
  * return true if the endpoind has valid parameters
  */
+#if MHD_VERSION >= 0x00097002
+static enum MHD_Result ulfius_is_valid_endpoint(const struct _u_endpoint * endpoint, int to_delete) {
+#else
 static int ulfius_is_valid_endpoint(const struct _u_endpoint * endpoint, int to_delete) {
+#endif
   if (endpoint != NULL) {
     if (ulfius_equals_endpoints(endpoint, ulfius_empty_endpoint())) {
       // Should be the last endpoint of the list to close it
@@ -290,10 +302,15 @@ static void mhd_request_completed (void *cls, struct MHD_Connection *connection,
  * if a parameter is larger than max_post_param_size, truncate it
  * return MHD_NO on error
  */
+#if MHD_VERSION >= 0x00097002
+static enum MHD_Result mhd_iterate_post_data (void * coninfo_cls, enum MHD_ValueKind kind, const char * key,
+                                  const char * filename, const char * content_type,
+                                  const char * transfer_encoding, const char * data, uint64_t off, size_t size) {
+#else
 static int mhd_iterate_post_data (void * coninfo_cls, enum MHD_ValueKind kind, const char * key,
                                   const char * filename, const char * content_type,
                                   const char * transfer_encoding, const char * data, uint64_t off, size_t size) {
-  
+#endif
   struct connection_info_struct * con_info = coninfo_cls;
   size_t cur_size = size;
   char * data_dup, * filename_param;
@@ -352,14 +369,28 @@ static int mhd_iterate_post_data (void * coninfo_cls, enum MHD_ValueKind kind, c
  * function executed by libmicrohttpd every time an HTTP call is made
  * return MHD_NO on error
  */
+#if MHD_VERSION >= 0x00097002
+static enum MHD_Result ulfius_webservice_dispatcher (void * cls, struct MHD_Connection * connection,
+                                         const char * url, const char * method,
+                                         const char * version, const char * upload_data,
+                                         size_t * upload_data_size, void ** con_cls) {
+#else
 static int ulfius_webservice_dispatcher (void * cls, struct MHD_Connection * connection,
                                          const char * url, const char * method,
                                          const char * version, const char * upload_data,
                                          size_t * upload_data_size, void ** con_cls) {
-
+#endif
   struct _u_endpoint * endpoint_list = ((struct _u_instance *)cls)->endpoint_list, ** current_endpoint_list = NULL, * current_endpoint = NULL;
   struct connection_info_struct * con_info = * con_cls;
-  int mhd_ret = MHD_NO, callback_ret = U_OK, i, close_loop = 0, inner_error = U_OK, mhd_response_flag;
+
+#if MHD_VERSION >= 0x00096100
+    enum MHD_ResponseMemoryMode mhd_response_flag = ((struct _u_instance *)cls)->mhd_response_copy_data?MHD_RESPMEM_MUST_COPY:MHD_RESPMEM_MUST_FREE;
+    enum MHD_Result mhd_ret = MHD_NO;
+#else
+    int mhd_response_flag = MHD_RESPMEM_MUST_FREE, mhd_ret = MHD_NO;
+#endif
+  int callback_ret = U_OK, i, close_loop = 0, inner_error = U_OK;
+  
 #ifndef U_DISABLE_WEBSOCKET
   // Websocket variables
   int upgrade_protocol = 0;
