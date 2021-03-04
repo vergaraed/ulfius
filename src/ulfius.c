@@ -62,7 +62,11 @@ int y_close_logs() {
 /**
  * Fill a map with the key/values specified
  */
+#if MHD_VERSION >= 0x00097002
 static enum MHD_Result ulfius_fill_map_check_utf8(void * cls, enum MHD_ValueKind kind, const char * key, const char * value) {
+#else
+static int ulfius_fill_map_check_utf8(void * cls, enum MHD_ValueKind kind, const char * key, const char * value) {
+#endif
   char * tmp;
   int res;
   UNUSED(kind);
@@ -95,7 +99,11 @@ static enum MHD_Result ulfius_fill_map_check_utf8(void * cls, enum MHD_ValueKind
 /**
  * Fill a map with the key/values specified
  */
+#if MHD_VERSION >= 0x00097002
 static enum MHD_Result ulfius_fill_map(void * cls, enum MHD_ValueKind kind, const char * key, const char * value) {
+#else
+static int ulfius_fill_map(void * cls, enum MHD_ValueKind kind, const char * key, const char * value) {
+#endif
   char * tmp;
   int res;
   UNUSED(kind);
@@ -125,7 +133,11 @@ static enum MHD_Result ulfius_fill_map(void * cls, enum MHD_ValueKind kind, cons
  * ulfius_is_valid_endpoint
  * return true if the endpoind has valid parameters
  */
+#if MHD_VERSION >= 0x00097002
 static enum MHD_Result ulfius_is_valid_endpoint(const struct _u_endpoint * endpoint, int to_delete) {
+#else
+static int ulfius_is_valid_endpoint(const struct _u_endpoint * endpoint, int to_delete) {
+#endif
   if (endpoint != NULL) {
     if (ulfius_equals_endpoints(endpoint, ulfius_empty_endpoint())) {
       // Should be the last endpoint of the list to close it

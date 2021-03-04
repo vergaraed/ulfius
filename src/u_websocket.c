@@ -47,6 +47,9 @@
 /**********************************/
 /** Internal websocket functions **/
 /**********************************/
+#if __APPLE__
+#define MSG_NOSIGNAL 0
+#endif
 
 static int is_websocket_data_available(struct _websocket_manager * websocket_manager) {
   int ret = 0, poll_ret = 0;
