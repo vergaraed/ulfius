@@ -56,6 +56,7 @@ void y_log_message(const unsigned long type, const char * message, ...) {
 int y_close_logs() {
   return 1;
 }
+
 #endif
 
 /**
